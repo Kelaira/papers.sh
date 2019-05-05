@@ -44,61 +44,57 @@ and then choose article, that you would like to open."
 chybik()
 {
 # if there is something wrong, this would be shown to user
-echo "Error: $errorik Print $0 -h, or $0 --h to show help page"
-
-cleaner
-
-exit
+        echo "Error: $errorik Print $0 -h, or $0 --h to show help page"
+        cleaner
+        exit
 }
 
 makefile()
 {
-# vytvori soubor s nalezenymi clanky podle libovule uzivatele
+# makes directory with founded articles
 
-echo "Zadejte nazev slozky ve vasem domovskem adresari, kam si prejete \
-clanky ulozit."
-read dirname
-# vytvoreni seznamu paperu v home dir
-# pokud existuje seznam slozek s papery
-if [ -f .papers ]; then
-        # a je neprazdny
-        if [ -n .papers ]; then
-                echo "$dirname" >> .papers
+        echo "Enter directory name in your home direcotry, \
+where you want to save articles."
+        read dirname
+        
+        # will make a file with list of directories, where
+        # papers are saved
+        if [ -f .papers ]; then
+                
+                if [ -n .papers ]; then
+                        echo "$dirname" >> .papers
+                fi
+        else
+                echo "$dirname" > .papers
         fi
-else
-        echo "$dirname" > .papers
-fi
 
-# premisteni do slozky, kam se budou ukladat papery
-if [ -e "$dirname" ]; then
-        cd /home/$USER/$dirname
-else
-        cd /home/$USER
-        mkdir "$dirname"
-        cd $dirname
-fi
+        # moving to the directory, where articles will be saved
+        if [ -e "$dirname" ]; then
+                cd /home/$USER/$dirname
+        else
+                cd /home/$USER
+                mkdir "$dirname"
+                cd $dirname
+        fi
 }
 
 cleaner()
 {
-# az script skonci, smaze po sobe zbytecne veci
-if [ -f /tmp/hledej ];then
-        rm /tmp/hledej
-fi
-if [ -f /tmp/odkazy ]; then
-        rm /tmp/odkazy
-fi
-if [ -f /tmp/nazvy ]; then
-        rm /tmp/nazvy
-fi
+# delete all temporary files script uses
 
+if [ -f /tmp/hledej ];then
+        rm /tmp/hledej; fi;
+if [ -f /tmp/odkazy ]; then
+        rm /tmp/odkazy; fi;
+if [ -f /tmp/nazvy ]; then
+        rm /tmp/nazvy; fi;
 }
 
 findpapers()
 {
+# finds articles with specified key words
 
 q=$( echo "$listofkeys" | tail -c +1 | tr ' ' '+')
-
 echo "parametry hledani: $q"
 
 curl -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.12.2 Chrome/69.0.3497.128 Safari/537.36' "https://scholar.google.cz/scholar?start=0&q=$q&hl=cs&as_sdt=1,5&as_vis=1" 2> /dev/null > /tmp/hledej;
@@ -113,14 +109,17 @@ grep -e =\"gs_or_ggsm\" -e pdf /tmp/hledej | sed 's/<\/h3>/&\
 i=0
 while read -r line; do
         i=$(($i + 1))
-        # stahne soubor
+        # download file
         wget "$line" 2> /dev/null
-        # vyjme nazev stazeneho souboru
+        
+        # take a name of loaded file
         nameofloadfile=$( echo "$line" | sed 's/.*\///; s/%20/ /g')
         nameoffile="$( head -n $i /tmp/nazvy | tail -n 1 ).pdf"
-        # prejmenuje soubor podle nazvu clanku
+        
+        # rename file
         mv "$nameofloadfile" "$nameoffile"
-        # prida clanek do seznamu clanku v slozce, soubor je "neviditelny"
+        
+        # add article to the list in special file in directory {soubor je "neviditelny"}
         if [ -f ".$dirname" ]; then
                 echo "$nameoffile" >> ".$dirname"
         else
@@ -132,18 +131,22 @@ done < /tmp/odkazy
 
 choosedir()
 {
-echo "Print the number of directory, you would like to open."
-echo "Or print 'q' for exit."
+        echo "Print the number of directory, you would like to open."
+        echo "Or print 'q' for exit."
+
         awk '{print " " NR " >\t" $s}' .papers
         # da se to udelat i pomoci cat -n, ale to se mi nelibi, jak to vypada
         # zajimava je i moznost grep -n '^' , vzhled take neni tak pekny
         read number
+        
         case "$number" in
                 q )
                         exit;;
+                        
                 [0-9] | [0-9][0-9] | [0-9][0-9][0-9] )
 
                         jmeno=$(sed "${number}q;d" .papers);;
+                        
                 *)
                         errorik="wrong input format"
                         chybik;;
@@ -155,16 +158,20 @@ choosefile()
         echo "Files from $jmeno"
         echo "Print the number of file, you would like to open."
         echo "Or print 'r' to choose another directory"
+        
         awk '{print " " NR " >\t" $s}' /home/$USER/$jmeno/".$jmeno"
         read char
+        
         case "$char" in
                 r )
                         choosedir;;
 
                 [0-9] | [0-9][0-9] | [0-9][0-9][0-9] )
+                        
                         cd /home/$USER/$jmeno
                         filename=$(sed "${char}q;d" ".$jmeno")
                         xdg-open "$filename";;
+                        
                 * )
                         errorik="wrong input format."
                         chybik;;
@@ -174,12 +181,12 @@ choosefile()
 
 reading()
 {
-# zobrazi uzivateli slozky, kam kdy ulozil svoje papery
-# uzivatel si slozku vybere a pak si muze v dane slozce vybrat
+# show user directories, where he stored his papers
+# user chooses directory and then a file, he wants to open
 if [ -f .papers ]; then
+        
         choosedir
         choosefile
-
 else
         echo "You have no papers yet."
 fi
@@ -192,10 +199,11 @@ fi
 
 
 trap "chybik"  2 3 15
-# cteni vstupu
+# reading input
+
 case "$1" in
 
-        # osetreni optionu -f
+        # option -f
 
         -f | --find )
                 if [ $# -eq 1 ]; then
