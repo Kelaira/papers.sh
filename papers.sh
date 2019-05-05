@@ -173,7 +173,8 @@ choosefile()
                         choosedir;;
 
                 [0-9] | [0-9][0-9] | [0-9][0-9][0-9] )
-
+                        cd /home/$USER/$jmeno
+                        filename=$(sed "${char}q;d" ".$jmeno")
                         openfile;;
                 * )
                         errorik="wrong input format."
@@ -184,7 +185,8 @@ choosefile()
 
 openfile()
 {
-echo "jsem tu"
+echo "$filename"
+# xdg-open "$filename"
 }
 
 reading()
