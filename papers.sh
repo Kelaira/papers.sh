@@ -108,7 +108,7 @@ fi
 findpapers()
 {
 
-q=$( echo "$listofkeys" | tail -c +2 | tr ' ' '+')
+q=$( echo "$listofkeys" | tail -c +1 | tr ' ' '+')
 
 echo "parametry hledani: $q"
 
@@ -184,7 +184,7 @@ choosefile()
 
 openfile()
 {
-echo "kokot"
+echo "jsem tu"
 }
 
 reading()
