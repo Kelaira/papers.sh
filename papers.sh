@@ -19,24 +19,26 @@ helpik()
         echo ""
         echo "--DESCRIPTION--"
         echo "papers.sh is a script for looking for and storing papers"
-        echo "it looks for new titels through scholar.google and stores them whenever \
+        echo "it looks for new articles through scholar.google and stores them whenever \
 you want in your home directory"
         echo "Script works with the following options:"
         echo " -f, --find"
-        echo "\t With that option you can look for new papers."
-        echo "\t After option you should add \"key\" words of your dream titel."
-        echo "\t With the number after -f you can choose, how many papers (up to 50) would you like to find."
-        echo "\t Example:"
-        echo "\t\t '$0 -f nilpotent matrices' will find papers with words 'nilpotent' and 'matrices' in it"
-        echo "\t\t '$0 -f 13 unix shell function' will find 13 papers with words 'unix', 'shell', 'function'"
-        echo "\t Every time you call script with that option, it would ask you, where to save new papers"
-        echo "\t It must be an existing directory in your home directory, or a name for non existing directory, that would be created"
+        echo "With that option you can look for new papers."
+        echo "After option you should add \"key\" words of your dream article."
+        echo "With the number after -f you can choose, how many papers (up to 50) would you like to find."
+        echo "Example:"
+        echo "'$0 -f nilpotent matrices' will find articles with words 'nilpotent' and 'matrices' in it"
+        echo "'$0 -f 13 unix shell function' will find 13 articles with words 'unix', 'shell', 'function'"
+        echo "Every time you call script with that option, it would ask you, where to save new papers"
+        echo "It must be an existing directory in your home directory, or a name for non existing directory, that will be created"
         echo ""
         echo " -r, --read"
-        echo "\t With that option, you can open your later downloaded papers"
-        echo ""
+        echo "With that option, you can open your later downloaded articles"
+        echo "It shows you all directories, where articles have been saved. You choose directory \
+and then choose article, that you would like to open."
+        echo "The document will be opened in your default pdf viewer (mainly evince)"
         echo " -h, --help"
-        echo "\t Will show you this help page."
+        echo "Will show you this help page."
 }
 
 chybik()
@@ -49,19 +51,6 @@ cleaner
 exit
 }
 
-viewerconf()
-{
-        conf=".pdfviewer.conf"
-        if [ -f "$conf" ]; then
-                echo "okular" > "$conf"
-                echo "evince" >> "$conf"
-                echo "zathura" >> "$conf"
-                echo "" >> "$conf"
-                echo "" >> "$conf"
-                echo "" >> "$conf"
-                echo "" >> "$conf"
-        fi
-}
 makefile()
 {
 # vytvori soubor s nalezenymi clanky podle libovule uzivatele
@@ -175,18 +164,12 @@ choosefile()
                 [0-9] | [0-9][0-9] | [0-9][0-9][0-9] )
                         cd /home/$USER/$jmeno
                         filename=$(sed "${char}q;d" ".$jmeno")
-                        openfile;;
+                        xdg-open "$filename";;
                 * )
                         errorik="wrong input format."
                         chybik;;
 
         esac
-}
-
-openfile()
-{
-echo "$filename"
-# xdg-open "$filename"
 }
 
 reading()
