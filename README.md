@@ -19,7 +19,7 @@ SYNOPSIS
 
 OPTIONS
 
-         -f, --find [NUMBER] [KEYS]...
+         -f, --find [NUMBER] keys...
                 With this option you can search for new papers. After -f keywords
                 must be added. You can also choose how many papers will be downloaded 
                 by adding a number [1-50] between -f and keywords.
