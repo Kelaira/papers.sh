@@ -4,7 +4,8 @@ DESCRIPTION
     papers.sh is a script for looking for articles and storing them.
     It uses two search engines: scholar.google.com and google.com
     to look for articles. ATTENTION! You need program googler to be installed.
-    For more information follow https://github.com/jarun/googler#installation
+    For more information follow
+   https://github.com/jarun/googler#installation
                 
     The program has two functions: find articles, browse loaded articles.
     You can store your founded articles only in home directory in some existing
