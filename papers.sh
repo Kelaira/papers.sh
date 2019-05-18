@@ -1,8 +1,6 @@
 #!/bin/bash
 
-###############################################################################
-###############################################################################
-###########          DEKLARACE PROMENNYCH            ##########################
+########             DEKLARACE PROMENNYCH            ##########################
 
 listofkeys=""   # seznam parametru vyhledavani
 errorik="Something went wrong."
@@ -144,24 +142,16 @@ loadpage()
 {
 
         curl -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.12.2 Chrome/69.0.3497.128 Safari/537.36' "https://scholar.google.cz/scholar?start=$s&q=$q&hl=cs&as_sdt=1,5&as_vis=1" 2> /dev/null > /tmp/hledej;
-        echo "https://scholar.google.cz/scholar?start=$s&q=$q&hl=cs&as_sdt=1,5&as_vis=1"
 
-        cat /tmp/hledej
-
-        read kokot
 
         # vyjmeme radky s h3
         grep -e =\"gs_r\ gs_or\ gs_scl\" /tmp/hledej | sed 's/<\/h3>/&\
         /g' > /tmp/odstavce
-        echo "kokotina"
-
-        j=0
+      
+	j=1
         while read -r line; do
-                echo "$i"
-                echo "$j"
-                if [ $j -le $i ]; then
-                        echo "zaciname hledat"
-                        echo "j: $j, i: $i, 1: $1, s: $s"
+                
+		if [ $j -le $i ]; then
 
                         if [ -n "$( echo "$line" | grep -e PDF )" ]; then
 
@@ -170,7 +160,6 @@ loadpage()
                                 /' | grep pdf | sed 's/.*.a href="//;
                                 s/\(.pdf\)[^"]*".*/\1/g' | grep ^http )
 
-                                echo "link: $link"
                                 # stahneme soubor
                                 wget "$link" 2> /dev/null
 
@@ -181,14 +170,39 @@ loadpage()
                                 nameoffile="$( echo "$line" | sed -e 's/.*\">\(.*.\)<\/a>.*/\1/' \
                                 -e 's/<b>//' -e 's/<\/b>//').pdf"
 
-                                echo ""
                                 mv "$nameofloadfile" "$nameoffile"
                                 j=$(($j+1))
                         else
 
-                                echo ""
-                                echo "hledej googlem"
-                                j=$(($j+1))
+				# vyjmeme nazev clanku
+                                nameoffile="$( echo "$line" | sed -e 's/.*\">\(.*.\)<\/a>.*/\1/' \
+                                -e 's/<b>//' -e 's/<\/b>//')"
+				# hledame pomoci googleru dany clanek v pdf formatu
+
+				googler --json "$nameoffile filetype:pdf" > /tmp/googleni
+
+				# stahovani
+				link=$( cat /tmp/googleni | grep "\.pdf" | head -n1 | sed "s/.*http\(.*.\)\"/http\1/ " )
+				
+				if [ -n "$link" ]; then
+					wget "$link" 2> /dev/null
+				
+					# vyjmeme jmeno souboru
+                               		nameofloadfile="$( echo "$link" | sed 's/.*\///; s/%20/ /g' )"
+					nameoffile="$nameoffile.pdf"
+					if [ -z "$nameoffile" ]; then
+						echo "some problems with loading file"
+					else
+						mv "$nameofloadfile" "$nameoffile" 2>/dev/null
+					fi
+					
+					if [ $? -eq 0 ]; then	
+						j=$(($j+1))
+					else
+						echo "some problems with loading file, may be it wouldnt have a good name"
+					fi
+				fi
+					
                         fi
                 else
                         break
@@ -202,6 +216,8 @@ loadpage()
         else
                 s=10
         fi
+	j=$(($j-1))
+
 }
 
 findpapers()
@@ -216,61 +232,11 @@ findpapers()
         while [ $i -ne 0 ]; do
 
                 loadpage $i
-                echo "i: $i"
-                echo "j: $j"
                 i=$(($i-$j))
-                echo "$i"
         done
 
-
-
-
-
-
-
-#       q=$( echo "$listofkeys" | tail -c +1 | tr ' ' '+')
-
-#       echo "parametry hledani: $q"
-
-#       curl -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.12.2 Chrome/69.0.3497.128 Safari/537.36' "https://scholar.google.cz/scholar?start=0&q=$q&hl=cs&as_sdt=1,5&as_vis=1" 2> /dev/null > /tmp/hledej;
-
-        # vyjmeme radky s h3
-#       grep -e =\"gs_r\ gs_or\ gs_scl\" /tmp/hledej | sed 's/<\/h3>/&\
-#       /g' > /tmp/odstavce
-
-        # osetrujeme, jeli mozne stahnout soubor hned, kdyz ne, tak hledame dal
-#       while read -r line; do
-
-#               if [ -n "$( echo "$line" | grep -e PDF )" ]; then
-
-                        # vyjmeme odkaz
-#                       link=$( echo "$line" | sed 's/]/]\
-#                       /' | grep pdf | sed 's/.*.a href="//;
-#                       s/\(.pdf\)[^"]*".*/\1/g' | grep ^http )
-
-                        # stahneme soubor
-#                       wget "$link" 2> /dev/null
-
-                        # vyjmeme jmeno souboru
-#                       nameofloadfile="$( echo "$link" | sed 's/.*\///; s/%20/ /g' )"
-
-                        # vyjmeme nazev clanku
-#                       nameoffile="$( echo "$line" | sed -e 's/.*\">\(.*.\)<\/a>.*/\1/' \
-#                       -e 's/<b>//' -e 's/<\/b>//').pdf"
-
-#                       echo ""
-#                       mv "$nameofloadfile" "$nameoffile"
-#               else
-
-#                       echo ""
-#                       echo "hledej googlem"
-#               fi
-
-#       done < /tmp/odstavce
-
-
-########################################################
-#    stara verze     #
+###############################################################################
+#    stara verze - muze se hodit    #
 # grep -e =\"gs_or_ggsm\" /tmp/hledej | sed 's/]/]\
 #       /g' | grep pdf |sed 's/.*.a href="//; s/\(.pdf\)[^"]*".*/\1/' | grep ^http > /tmp/odkazy
 
@@ -285,7 +251,8 @@ findpapers()
 
 choosedir()
 {
-        echo ""
+        clear
+	echo ""
         echo "Print the number of directory, you would like to open."
         echo "Or print 'q' for exit."
 
@@ -329,7 +296,7 @@ choosedir()
                                                 fi
 
                                         fi
-                                        break;;
+                                        ;;
                                 *)
                                         errorik="wrong input format"
                                         chybik;;
@@ -346,6 +313,7 @@ choosedir()
 
 choosefile()
 {
+	clear
         echo ""
         echo "Files from $(pwd)"
         echo "Print the number of file, you would like to open."
@@ -358,7 +326,6 @@ choosefile()
         # zpracovani volby uzivatele
         read char
         maxnumber=$(wc -l /tmp/vypis | sed -E 's/(^[1-9]+).*/\1/')
-        echo "$maxnumber"
         case "$char" in
                 r )
                         choosedir;;
@@ -375,12 +342,11 @@ choosefile()
 
                         else
                                 filename=$( sed "${char}q;d" /tmp/vypis)
-
-                                if [ -n $viewer ]; then
-                                        cho="chi"
-                                else
+                                if [ -z $viewer ]; then
                                         xdg-open "$filename"
-                                fi
+                                else
+					"$viewer" "$filename"
+				fi
                         fi;;
                 * )
                         errorik="wrong input format."
