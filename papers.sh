@@ -72,20 +72,6 @@ chybik()
         exit
 }
 
-pdfconf()
-{
-        conf=".pdfviewer.conf"
-        if [ -f "$conf" ]; then
-                echo "okular" > "$conf"
-                echo "evince" >> "$conf"
-                echo "zathura" >> "$conf"
-                echo "xpdf" >> "$conf"
-                echo "gv" >> "$conf"
-                echo "mupdf" >> "$conf"
-                echo "qpdfviewer" >> "$conf"
-        fi
-}
-
 ###############################################################################
 ########################     FIND      ########################################
 
