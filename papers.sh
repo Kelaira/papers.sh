@@ -1,11 +1,16 @@
 #!/bin/bash
 
-#deklarace promennych
+###############################################################################
+###############################################################################
+###########          DEKLARACE PROMENNYCH            ##########################
 
 listofkeys=""   # seznam parametru vyhledavani
 errorik="Something went wrong."
+pnumber=10 # cislo hledanych clanku je defaultne 10
 
-# funkce
+###############################################################################
+###############################################################################
+################      FUNKCE       ############################################
 
 helpik()
 {
@@ -19,159 +24,364 @@ helpik()
         echo ""
         echo "--DESCRIPTION--"
         echo "papers.sh is a script for looking for and storing papers"
-        echo "it looks for new articles through scholar.google and stores them whenever \
+        echo "it looks for new titels through scholar.google and stores them whenever \
 you want in your home directory"
         echo "Script works with the following options:"
         echo " -f, --find"
-        echo "With that option you can look for new papers."
-        echo "After option you should add \"key\" words of your dream article."
-        echo "With the number after -f you can choose, how many papers (up to 50) would you like to find."
-        echo "Example:"
-        echo "'$0 -f nilpotent matrices' will find articles with words 'nilpotent' and 'matrices' in it"
-        echo "'$0 -f 13 unix shell function' will find 13 articles with words 'unix', 'shell', 'function'"
-        echo "Every time you call script with that option, it would ask you, where to save new papers"
-        echo "It must be an existing directory in your home directory, or a name for non existing directory, that will be created"
+        echo "\t With that option you can look for new papers."
+        echo "\t After option you should add \"key\" words of your dream titel."
+        echo "\t With the number after -f you can choose, how many papers (up to 50) would you like to find."
+        echo "\t Example:"
+        echo "\t\t '$0 -f nilpotent matrices' will find papers with words 'nilpotent' and 'matrices' in it"
+        echo "\t\t '$0 -f 13 unix shell function' will find 13 papers with words 'unix', 'shell', 'function'"
+        echo "\t Every time you call script with that option, it would ask you, where to save new papers"
+        echo "\t It must be an existing directory in your home directory, or a name for non existing directory, that would be created"
         echo ""
         echo " -r, --read"
-        echo "With that option, you can open your later downloaded articles"
-        echo "It shows you all directories, where articles have been saved. You choose directory \
-and then choose article, that you would like to open."
-        echo "The document will be opened in your default pdf viewer (mainly evince)"
+        echo "\t With that option, you can open your later downloaded papers"
+        echo ""
         echo " -h, --help"
-        echo "Will show you this help page."
+        echo "\t Will show you this help page."
 }
 
 chybik()
 {
-# if there is something wrong, this would be shown to user
-        echo "Error: $errorik Print $0 -h, or $0 --h to show help page"
+        # if there is something wrong, this would be shown to user
+        echo "Error: $errorik"
+        echo "Print $0 -h, or $0 --h to show help page"
+
         cleaner
+
         exit
 }
 
+pdfconf()
+{
+        conf=".pdfviewer.conf"
+        if [ -f "$conf" ]; then
+                echo "okular" > "$conf"
+                echo "evince" >> "$conf"
+                echo "zathura" >> "$conf"
+                echo "xpdf" >> "$conf"
+                echo "gv" >> "$conf"
+                echo "mupdf" >> "$conf"
+                echo "qpdfviewer" >> "$conf"
+        fi
+}
+
+###############################################################################
+########################     FIND      ########################################
+
 makefile()
 {
-# makes directory with founded articles
+        # vytvori adresar s nalezenymi clanky podle libovule uzivatele
 
-        echo "Enter directory name in your home direcotry, \
-where you want to save articles."
+        echo "Zadejte nazev slozky ve vasem domovskem adresari, kam si prejete \
+clanky ulozit."
         read dirname
-        
-        # will make a file with list of directories, where
-        # papers are saved
-        if [ -f .papers ]; then
-                
-                if [ -n .papers ]; then
-                        echo "$dirname" >> .papers
-                fi
-        else
-                echo "$dirname" > .papers
+
+        # osetreni nazvu slozky
+        # pokud nazev nezacina /, tak pridame adresu domu
+        if [ -z $(echo "$dirname" | grep ^/ ) ]; then
+                dirname="/home/$USER/$dirname"
         fi
 
-        # moving to the directory, where articles will be saved
-        if [ -e "$dirname" ]; then
-                cd /home/$USER/$dirname
+        # vytvareni slozky pro papery
+        if [ -d "$dirname" ]; then
+                # nevytvarim slozku
+                dirname="$dirname"
         else
-                cd /home/$USER
                 mkdir "$dirname"
-                cd $dirname
+        fi
+
+        # pokud slozka s papery neexistuje, pak ji zalozime
+        if [ -d "/home/$USER/papers" ]; then
+
+                ## papers existuje
+                cd "/home/$USER/papers"
+                vypis=$( ls -1 )
+                symname=$( echo "$dirname" | tr "/" ":" )
+
+                # pokud symlink s nazvem slozky neexistuje vytvorime ho
+                if [ -z $(echo "$vypis" | grep "$symname") ]; then
+
+                        # odkaz neexistuje
+                        touch "$symname"
+                fi
+
+                # premistime se do slozky, kam budeme stahovat papery
+                cd "$dirname"
+        else
+                # zalozime papers
+                mkdir "/home/$USER/papers"
+                cd "/home/$USER/papers"
+                vypis=$( ls -1 )
+                symname=$( echo "$dirname" | tr "/" ":" )
+
+                if [ -z $(echo "$vypis" | grep "$symname") ]; then
+                        touch "$symname"
+                fi
+
+                cd "$dirname"
         fi
 }
 
 cleaner()
 {
-# delete all temporary files script uses
+# az script skonci, smaze po sobe zbytecne veci
+        if [ -f /tmp/hledej ];then
+                rm /tmp/hledej
+        fi
+        if [ -f /tmp/odkazy ]; then
+                rm /tmp/odkazy
+        fi
+        if [ -f /tmp/nazvy ]; then
+                rm /tmp/nazvy
+        fi
+}
 
-if [ -f /tmp/hledej ];then
-        rm /tmp/hledej; fi;
-if [ -f /tmp/odkazy ]; then
-        rm /tmp/odkazy; fi;
-if [ -f /tmp/nazvy ]; then
-        rm /tmp/nazvy; fi;
+loadpage()
+{
+
+        curl -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.12.2 Chrome/69.0.3497.128 Safari/537.36' "https://scholar.google.cz/scholar?start=$s&q=$q&hl=cs&as_sdt=1,5&as_vis=1" 2> /dev/null > /tmp/hledej;
+        echo "https://scholar.google.cz/scholar?start=$s&q=$q&hl=cs&as_sdt=1,5&as_vis=1"
+
+        cat /tmp/hledej
+
+        read kokot
+
+        # vyjmeme radky s h3
+        grep -e =\"gs_r\ gs_or\ gs_scl\" /tmp/hledej | sed 's/<\/h3>/&\
+        /g' > /tmp/odstavce
+        echo "kokotina"
+
+        j=0
+        while read -r line; do
+                echo "$i"
+                echo "$j"
+                if [ $j -le $i ]; then
+                        echo "zaciname hledat"
+                        echo "j: $j, i: $i, 1: $1, s: $s"
+
+                        if [ -n "$( echo "$line" | grep -e PDF )" ]; then
+
+                                # vyjmeme odkaz
+                                link=$( echo "$line" | sed 's/]/]\
+                                /' | grep pdf | sed 's/.*.a href="//;
+                                s/\(.pdf\)[^"]*".*/\1/g' | grep ^http )
+
+                                echo "link: $link"
+                                # stahneme soubor
+                                wget "$link" 2> /dev/null
+
+                                # vyjmeme jmeno souboru
+                                nameofloadfile="$( echo "$link" | sed 's/.*\///; s/%20/ /g' )"
+
+                                # vyjmeme nazev clanku
+                                nameoffile="$( echo "$line" | sed -e 's/.*\">\(.*.\)<\/a>.*/\1/' \
+                                -e 's/<b>//' -e 's/<\/b>//').pdf"
+
+                                echo ""
+                                mv "$nameofloadfile" "$nameoffile"
+                                j=$(($j+1))
+                        else
+
+                                echo ""
+                                echo "hledej googlem"
+                                j=$(($j+1))
+                        fi
+                else
+                        break
+                fi
+
+
+
+        done < /tmp/odstavce
+        if [ -n "$s" ]; then
+                s=$(($s+10))
+        else
+                s=10
+        fi
 }
 
 findpapers()
 {
-# finds articles with specified key words
+        q=$( echo "$listofkeys" | tail -c +1 | tr ' ' '+')
 
-q=$( echo "$listofkeys" | tail -c +1 | tr ' ' '+')
-echo "parametry hledani: $q"
+        echo "parametry hledani: $q"
 
-curl -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.12.2 Chrome/69.0.3497.128 Safari/537.36' "https://scholar.google.cz/scholar?start=0&q=$q&hl=cs&as_sdt=1,5&as_vis=1" 2> /dev/null > /tmp/hledej;
 
-grep -e =\"gs_or_ggsm\" /tmp/hledej | sed 's/]/]\
-        /g' | grep pdf |sed 's/.*.a href="//; s/\(.pdf\)[^"]*".*/\1/' | grep ^http > /tmp/odkazy
+        s=""  # cislo stranky
+        i=$pnumber  # cislo clanku
+        while [ $i -ne 0 ]; do
 
-grep -e =\"gs_or_ggsm\" -e pdf /tmp/hledej | sed 's/<\/h3>/&\
-        /g' | grep -e PDF | sed -e 's/.*\">\(.*.\)<\/a>.*/\1/' -e 's/<b>//g' -e 's/<\/b>//g' \
-        > /tmp/nazvy
+                loadpage $i
+                echo "i: $i"
+                echo "j: $j"
+                i=$(($i-$j))
+                echo "$i"
+        done
 
-i=0
-while read -r line; do
-        i=$(($i + 1))
-        # download file
-        wget "$line" 2> /dev/null
-        
-        # take a name of loaded file
-        nameofloadfile=$( echo "$line" | sed 's/.*\///; s/%20/ /g')
-        nameoffile="$( head -n $i /tmp/nazvy | tail -n 1 ).pdf"
-        
-        # rename file
-        mv "$nameofloadfile" "$nameoffile"
-        
-        # add article to the list in special file in directory {soubor je "neviditelny"}
-        if [ -f ".$dirname" ]; then
-                echo "$nameoffile" >> ".$dirname"
-        else
-                echo "$nameoffile" > ".$dirname"
-        fi
 
-done < /tmp/odkazy
+
+
+
+
+
+#       q=$( echo "$listofkeys" | tail -c +1 | tr ' ' '+')
+
+#       echo "parametry hledani: $q"
+
+#       curl -A 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.12.2 Chrome/69.0.3497.128 Safari/537.36' "https://scholar.google.cz/scholar?start=0&q=$q&hl=cs&as_sdt=1,5&as_vis=1" 2> /dev/null > /tmp/hledej;
+
+        # vyjmeme radky s h3
+#       grep -e =\"gs_r\ gs_or\ gs_scl\" /tmp/hledej | sed 's/<\/h3>/&\
+#       /g' > /tmp/odstavce
+
+        # osetrujeme, jeli mozne stahnout soubor hned, kdyz ne, tak hledame dal
+#       while read -r line; do
+
+#               if [ -n "$( echo "$line" | grep -e PDF )" ]; then
+
+                        # vyjmeme odkaz
+#                       link=$( echo "$line" | sed 's/]/]\
+#                       /' | grep pdf | sed 's/.*.a href="//;
+#                       s/\(.pdf\)[^"]*".*/\1/g' | grep ^http )
+
+                        # stahneme soubor
+#                       wget "$link" 2> /dev/null
+
+                        # vyjmeme jmeno souboru
+#                       nameofloadfile="$( echo "$link" | sed 's/.*\///; s/%20/ /g' )"
+
+                        # vyjmeme nazev clanku
+#                       nameoffile="$( echo "$line" | sed -e 's/.*\">\(.*.\)<\/a>.*/\1/' \
+#                       -e 's/<b>//' -e 's/<\/b>//').pdf"
+
+#                       echo ""
+#                       mv "$nameofloadfile" "$nameoffile"
+#               else
+
+#                       echo ""
+#                       echo "hledej googlem"
+#               fi
+
+#       done < /tmp/odstavce
+
+
+########################################################
+#    stara verze     #
+# grep -e =\"gs_or_ggsm\" /tmp/hledej | sed 's/]/]\
+#       /g' | grep pdf |sed 's/.*.a href="//; s/\(.pdf\)[^"]*".*/\1/' | grep ^http > /tmp/odkazy
+
+#grep -e =\"gs_or_ggsm\" -e pdf /tmp/hledej | sed 's/<\/h3>/&\
+#       /g' | grep -e PDF | sed -e 's/.*\">\(.*.\)<\/a>.*/\1/' -e 's/<b>//g' -e 's/<\/b>//g' \
+#       > /tmp/nazvy
+
 }
+
+###############################################################################
+#####################       READ        #######################################
 
 choosedir()
 {
+        echo ""
         echo "Print the number of directory, you would like to open."
         echo "Or print 'q' for exit."
 
-        awk '{print " " NR " >\t" $s}' .papers
-        # da se to udelat i pomoci cat -n, ale to se mi nelibi, jak to vypada
-        # zajimava je i moznost grep -n '^' , vzhled take neni tak pekny
-        read number
-        
-        case "$number" in
-                q )
-                        exit;;
-                        
-                [0-9] | [0-9][0-9] | [0-9][0-9][0-9] )
+        # pokud slozka papers existuje
+        if [ -d "/home/$USER/papers" ]; then
 
-                        jmeno=$(sed "${number}q;d" .papers);;
-                        
-                *)
-                        errorik="wrong input format"
-                        chybik;;
-        esac
+                if [ -z "$(ls -1 "/home/$USER/papers")" ]; then
+                        echo "You have no papers yet."
+
+                else
+
+                        # vypise obsah slozky
+                        ls -1 "/home/$USER/papers" | tr ":" "/" > /tmp/vypis
+                        awk '{print " " NR " >\t" $s}' /tmp/vypis
+                        # da se to udelat i pomoci cat -n, ale to se mi nelibi, jak to vypada
+                        # zajimava je i moznost grep -n '^' , vzhled take neni tak pekny
+
+                        # zpracovani volby uzivatele
+                        read number
+                        maxnumber=$(wc -l /tmp/vypis | sed -E 's/(^[1-9]+).*/\1/')
+                        case "$number" in
+                                q )
+                                        exit;;
+                                [1-9] | [1-9][0-9] | [1-9][0-9][0-9] )
+
+                                        if [ $maxnumber -lt $number ]; then
+                                                errorik="wrong line number"
+                                                chybik
+
+                                        else
+                                                kam="$(sed "${number}q;d" /tmp/vypis)"
+
+                                                if [ -d "$kam" ]; then
+                                                        cd "$kam"
+                                                        choosefile
+
+                                                else
+                                                        echo "we are sorry"
+                                                        echo "direcctory does not exist"
+                                                        rm "$( echo "$kam" | tr "/" ":" )"
+                                                fi
+
+                                        fi
+                                        break;;
+                                *)
+                                        errorik="wrong input format"
+                                        chybik;;
+                        esac
+                        choosedir
+                fi
+
+        # pokud papers neexistuje
+        else
+                echo "You have no papers yet."
+                exit
+        fi
 }
 
 choosefile()
 {
-        echo "Files from $jmeno"
+        echo ""
+        echo "Files from $(pwd)"
         echo "Print the number of file, you would like to open."
-        echo "Or print 'r' to choose another directory"
-        
-        awk '{print " " NR " >\t" $s}' /home/$USER/$jmeno/".$jmeno"
+        echo "Print 'r' to choose another directory or 'q' for exit."
+
+        # vypis clanku
+        ls -1 | grep pdf > /tmp/vypis
+        awk '{print " " NR " >\t" $s}' /tmp/vypis
+
+        # zpracovani volby uzivatele
         read char
-        
+        maxnumber=$(wc -l /tmp/vypis | sed -E 's/(^[1-9]+).*/\1/')
+        echo "$maxnumber"
         case "$char" in
                 r )
                         choosedir;;
+                q )
+                        exit ;;
 
-                [0-9] | [0-9][0-9] | [0-9][0-9][0-9] )
-                        
-                        cd /home/$USER/$jmeno
-                        filename=$(sed "${char}q;d" ".$jmeno")
-                        xdg-open "$filename";;
-                        
+                [1-9] | [1-9][0-9] | [1-9][0-9][0-9] )
+
+                        if [ $char -gt $maxnumber ]; then
+
+                                errorik="wrong line number"
+                                chybik
+                                exit
+
+                        else
+                                filename=$( sed "${char}q;d" /tmp/vypis)
+
+                                if [ -n $viewer ]; then
+                                        cho="chi"
+                                else
+                                        xdg-open "$filename"
+                                fi
+                        fi;;
                 * )
                         errorik="wrong input format."
                         chybik;;
@@ -179,42 +389,41 @@ choosefile()
         esac
 }
 
+
+
 reading()
 {
-# show user directories, where he stored his papers
-# user chooses directory and then a file, he wants to open
-if [ -f .papers ]; then
-        
-        choosedir
-        choosefile
-else
-        echo "You have no papers yet."
-fi
+# zobrazi uzivateli slozky, kam kdy ulozil svoje papery
+# uzivatel si slozku vybere a pak si muze v dane slozce vybrat
+
+choosedir
+choosefile
+
 }
 
-
 ####################################################################
 ####################################################################
-############################ MAIN ##################################
+################         MAIN        ###############################
 
 
 trap "chybik"  2 3 15
-# reading input
-
+# cteni vstupu
 case "$1" in
 
-        # option -f
+        # osetreni optionu -f
 
         -f | --find )
                 if [ $# -eq 1 ]; then
                         chybik
                 else
-                # pokud druhy parametr neni cislo
+
+                # pokud druhy parametr je cislo
                 case "$2" in
                         [0-9] | [0-9][0-9] )
 
-                # prectu zbytek
+                                pnumber=$2
 
+                                # prectu zbytek
                                 while [ -n "$3" ]; do
                                         if [ -n "$listofkeys" ]; then
                                                 listofkeys="$listofkeys $3"
@@ -258,6 +467,12 @@ case "$1" in
                         helpik
                 else
                         chybik
+                fi;;
+        -sv | --set-viewer )
+                if [ $# -eq 1]; then
+                        chybik
+                else
+                        viewer="$2"
                 fi;;
         * )
                 chybik;;
