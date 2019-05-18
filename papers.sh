@@ -12,15 +12,15 @@ pnumber=10 # cislo hledanych clanku je defaultne 10
 
 helpik()
 {
-                echo " ----HELP----"
+                echo " HELP"
         echo ""
-        echo " --NAME--"
+        echo " NAME"
         echo " $0"
         echo ""
-        echo " --SYNOPSIS--"
+        echo " SYNOPSIS"
         echo " $0 [OPTION] [PARAMETRS]"
         echo ""
-        echo " --DESCRIPTION--"
+        echo " DESCRIPTION"
         echo " papers.sh is a script for looking for articles and storing them."
         echo -e " It uses two search engines: scholar.google.com and google.com\n \
 to look for articles. ATTENTION! You need program googler to be installed.\n \
