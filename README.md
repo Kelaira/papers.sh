@@ -17,11 +17,10 @@ papers.sh [-r]
 
 OPTIONS
 
- -f, --find [NUMBER] [KEYS]...
-         With that option you can look for new papers.
-         After -f keywords must be added. You can also choose, how many
-         papers will be downloaded, by adding a number [1-50] between -f an keys.
-
+         -f, --find [NUMBER] [KEYS]...
+                With that option you can look for new papers.
+                After -f keywords must be added. You can also choose, how many
+                papers will be downloaded, by adding a number [1-50] between -f an keys.
                 Every time you call the program with that option, it
                 would ask you, where to save new articles. It must be an existing directory
                 in your home directory, or a name for a new directory, that will be created.
@@ -33,13 +32,12 @@ OPTIONS
                 Will gice you a list of directories, where your articles
                 are stored. After choosing a directory, the list of articles will be
                 shown. After entering a number of article, the document will be opened
- in your default pdf viewer. (changing of default viewer will be added later)
+                in your default pdf viewer. (changing of default viewer will be added later)
 
                 If some directories were removed, program identifies
                 changes only after choosing non existing directory in this -r option.
                 After that the directory will be removed from the list.
-
- -h, --help
-\t Will show you this help.
+                
+         -h, --help
  
  
