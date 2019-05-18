@@ -18,7 +18,8 @@ helpik()
         echo " $0"
         echo ""
         echo " SYNOPSIS"
-        echo " $0 [OPTION] [PARAMETRS]"
+        echo " $0 [-f] [NUMBER] keys"
+	echo " $0 [-r]
         echo ""
         echo " DESCRIPTION"
         echo " papers.sh is a script for looking for articles and storing them."
