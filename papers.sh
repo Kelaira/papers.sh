@@ -23,39 +23,39 @@ helpik()
         echo " --DESCRIPTION--"
         echo " papers.sh is a script for looking for articles and storing them."
         echo -e " It uses two search engines: scholar.google.com and google.com\n \
- to look for articles. ATTENTION! You need program googler to be installed.\n \
- For more information follow https://github.com/jarun/googler#installation"
+to look for articles. ATTENTION! You need program googler to be installed.\n \
+For more information follow https://github.com/jarun/googler#installation"
         echo ""
         echo " The program has two functions: find articles, browse loaded articles."
-        echo " You can store your founded articles only in home directory\n \
- in some existing or not existing directories."
+        echo -e " You can store your founded articles only in home directory\n \
+in some existing or not existing directories."
         echo ""
         echo " Script works with the following options:"
         echo ""
-        echo -e "\t -f, --find [NUMBER] [KEYS]..."
-        echo -e "\t\tWith that option you can look for new papers.\n \
-\t\tAfter -f keywords must be added. You can also choose, how many\n \
-\t\tpapers will be downloaded, by adding a number [1-50] between -f an keys."
+        echo -e " -f, --find [NUMBER] [KEYS]..."
+        echo -e "\tWith that option you can look for new papers.\n \
+\tAfter -f keywords must be added. You can also choose, how many\n \
+\tpapers will be downloaded, by adding a number [1-50] between -f an keys."
         echo ""
-        echo -e "\t\tEvery time you call the program with that option, it\n \
-\t\twould ask you, where to save new articles. It must be an existing directory\n \
-\t\tin your home directory, or a name for a new directory, that will be created."
-        echo -e "\t\tExample:"
-        echo -e "\t\t\t $0 -f nilpotent matrices\n \
-\t\t\t $0 -f 13 unix shell function"
+        echo -e "\tEvery time you call the program with that option, it\n \
+\twould ask you, where to save new articles. It must be an existing directory\n \
+\tin your home directory, or a name for a new directory, that will be created."
+        echo -e "\tExample:"
+        echo -e "\t\t $0 -f nilpotent matrices\n \
+\t\t $0 -f 13 unix shell function"
         echo ""
-        echo -e "\t -r, --read"
-        echo -e "\t\tWill gice you a list of directories, where your articles\n \
-\t\tare stored. After choosing a directory, the list of articles will be\n \
-\t\tshown. After entering a number of article, the document will be opened\n \
-in your default pdf viewer. (changing of default viewer will be added later)"
+        echo -e " -r, --read"
+        echo -e "\tWill give you a list of directories, where your articles\n \
+\tare stored. After choosing a directory, the list of articles will be\n \
+\tshown. After entering a number of article, the document will be opened\n \
+\tin your default pdf viewer. (changing of default viewer will be added later)"
         echo ""
-        echo -e "\t\tIf some directories were removed, program identifies\n \
-\t\tchanges only after choosing non existing directory in this -r option.\n \
-\t\tAfter that the directory will be removed from the list."
+        echo -e "\tIf some directories were removed, program identifies\n \
+\tchanges only after choosing non existing directory in this -r option.\n \
+\tAfter that the directory will be removed from the list."
         echo ""
         echo " -h, --help"
-        echo "\t Will show you this help."
+        echo "\tWill show you this help."
         echo ""
         echo ""
 }
