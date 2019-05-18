@@ -12,34 +12,52 @@ pnumber=10 # cislo hledanych clanku je defaultne 10
 
 helpik()
 {
-        echo "----HELP----"
+                echo " ----HELP----"
         echo ""
-        echo "--NAME--"
-        echo "$0"
+        echo " --NAME--"
+        echo " $0"
         echo ""
-        echo "--SYNOPSIS--"
-        echo "$0 [OPTION] [PARAMETRS]"
+        echo " --SYNOPSIS--"
+        echo " $0 [OPTION] [PARAMETRS]"
         echo ""
-        echo "--DESCRIPTION--"
-        echo "papers.sh is a script for looking for and storing papers"
-        echo "it looks for new titels through scholar.google and stores them whenever \
-you want in your home directory"
-        echo "Script works with the following options:"
-        echo " -f, --find"
-        echo "\t With that option you can look for new papers."
-        echo "\t After option you should add \"key\" words of your dream titel."
-        echo "\t With the number after -f you can choose, how many papers (up to 50) would you like to find."
-        echo "\t Example:"
-        echo "\t\t '$0 -f nilpotent matrices' will find papers with words 'nilpotent' and 'matrices' in it"
-        echo "\t\t '$0 -f 13 unix shell function' will find 13 papers with words 'unix', 'shell', 'function'"
-        echo "\t Every time you call script with that option, it would ask you, where to save new papers"
-        echo "\t It must be an existing directory in your home directory, or a name for non existing directory, that would be created"
+        echo " --DESCRIPTION--"
+        echo " papers.sh is a script for looking for articles and storing them."
+        echo -e " It uses two search engines: scholar.google.com and google.com\n \
+ to look for articles. ATTENTION! You need program googler to be installed.\n \
+ For more information follow https://github.com/jarun/googler#installation"
         echo ""
-        echo " -r, --read"
-        echo "\t With that option, you can open your later downloaded papers"
+        echo " The program has two functions: find articles, browse loaded articles."
+        echo " You can store your founded articles only in home directory\n \
+ in some existing or not existing directories."
+        echo ""
+        echo " Script works with the following options:"
+        echo ""
+        echo -e "\t -f, --find [NUMBER] [KEYS]..."
+        echo -e "\t\tWith that option you can look for new papers.\n \
+\t\tAfter -f keywords must be added. You can also choose, how many\n \
+\t\tpapers will be downloaded, by adding a number [1-50] between -f an keys."
+        echo ""
+        echo -e "\t\tEvery time you call the program with that option, it\n \
+\t\twould ask you, where to save new articles. It must be an existing directory\n \
+\t\tin your home directory, or a name for a new directory, that will be created."
+        echo -e "\t\tExample:"
+        echo -e "\t\t\t $0 -f nilpotent matrices\n \
+\t\t\t $0 -f 13 unix shell function"
+        echo ""
+        echo -e "\t -r, --read"
+        echo -e "\t\tWill gice you a list of directories, where your articles\n \
+\t\tare stored. After choosing a directory, the list of articles will be\n \
+\t\tshown. After entering a number of article, the document will be opened\n \
+in your default pdf viewer. (changing of default viewer will be added later)"
+        echo ""
+        echo -e "\t\tIf some directories were removed, program identifies\n \
+\t\tchanges only after choosing non existing directory in this -r option.\n \
+\t\tAfter that the directory will be removed from the list."
         echo ""
         echo " -h, --help"
-        echo "\t Will show you this help page."
+        echo "\t Will show you this help."
+        echo ""
+        echo ""
 }
 
 chybik()
@@ -434,12 +452,7 @@ case "$1" in
                 else
                         chybik
                 fi;;
-        -sv | --set-viewer )
-                if [ $# -eq 1]; then
-                        chybik
-                else
-                        viewer="$2"
-                fi;;
+       
         * )
                 chybik;;
 esac
