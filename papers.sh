@@ -55,7 +55,7 @@ in some existing or not existing directories."
 \tAfter that the directory will be removed from the list."
         echo ""
         echo " -h, --help"
-        echo "\tWill show you this help."
+        echo -e "\tWill show you this help."
         echo ""
         echo ""
 }
