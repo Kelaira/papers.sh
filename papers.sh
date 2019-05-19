@@ -22,38 +22,41 @@ helpik()
 	echo " $0 [-r]
         echo ""
         echo " DESCRIPTION"
-        echo " papers.sh is a script for looking for articles and storing them."
-        echo -e " It uses two search engines: scholar.google.com and google.com\n \
-to look for articles. ATTENTION! You need program googler to be installed.\n \
-For more information follow https://github.com/jarun/googler#installation"
-        echo ""
-        echo " The program has two functions: find articles, browse loaded articles."
-        echo -e " You can store your founded articles only in home directory\n \
-in some existing or not existing directories."
+        echo " papers.sh is a script for searching for articles in PDF"
+	echo " and storing them. It uses two search engines, scholar.google.com" 
+	echo " and google.com to search for articles. ATTENTION! You need"
+	echo " program googler to be installed. For more information follow:"
+	echo " https://github.com/jarun/googler#installation"
+	echo ""
+	echo " The program has two functions: find articles, browse loaded"
+	echo " articles. Found articles can be stored in existing or" 
+	echo " non-existing directories of your home directory."
         echo ""
         echo " Script works with the following options:"
         echo ""
         echo -e " -f, --find [NUMBER] [KEYS]..."
-        echo -e "\tWith that option you can look for new papers.\n \
-\tAfter -f keywords must be added. You can also choose, how many\n \
-\tpapers will be downloaded, by adding a number [1-50] between -f an keys."
-        echo ""
-        echo -e "\tEvery time you call the program with that option, it\n \
-\twould ask you, where to save new articles. It must be an existing directory\n \
-\tin your home directory, or a name for a new directory, that will be created."
+        echo -e "\tWith this option you can search for new papers. After -f"
+	echo -e "\tkeywords must be added. You can also choose how many papers" 
+	echo -e "\twill be downloaded by adding a number [1-50] between -f and"
+	echo -e "\tkeywords."
+        echo ""    
+        echo -e "\tEvery time you call the program with this option, it will"
+	echo -e "\task you, where to save new articles. It must be an existing"
+	echo -e "\tdirectory in your home directory, or a name for a new" 
+	echo -e "\tdirectory, that will be created."
         echo -e "\tExample:"
         echo -e "\t\t $0 -f nilpotent matrices\n \
 \t\t $0 -f 13 unix shell function"
         echo ""
         echo -e " -r, --read"
-        echo -e "\tWill give you a list of directories, where your articles\n \
-\tare stored. After choosing a directory, the list of articles will be\n \
-\tshown. After entering a number of article, the document will be opened\n \
-\tin your default pdf viewer. (changing of default viewer will be added later)"
-        echo ""
-        echo -e "\tIf some directories were removed, program identifies\n \
-\tchanges only after choosing non existing directory in this -r option.\n \
-\tAfter that the directory will be removed from the list."
+        echo -e "\tWill give you a list of directories, where your articles are stored." 
+        echo -e "\tAfter choosing a directory, the list of articles will beshown. After" 
+        echo -e "\tentering a number of article, the document will be opened in your"
+	echo -e "\tdefault pdf viewer. Changing of default viewer will be added later."
+	echo ""
+        echo -e "\tIf some directories were removed, program identifies changes only after" 
+        echo -e "\tchoosing non-existing directory from the directory list. After that the"
+	echo -e "\tdirectory will be removed from the list."
         echo ""
         echo " -h, --help"
         echo -e "\tWill show you this help."
